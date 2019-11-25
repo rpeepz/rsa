@@ -6,7 +6,7 @@
 /*   By: rpapagna <rpapagna@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/10/11 13:49:49 by rpapagna          #+#    #+#             */
-/*   Updated: 2019/11/04 23:36:00 by rpapagna         ###   ########.fr       */
+/*   Updated: 2019/11/25 08:07:54 by rpapagna         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,10 +71,7 @@ static int		witness(__uint64_t n, t_primary *checks, int prob)
 		checks->r = tmp;
 		checks->x = powmod(checks->a[i], checks->d, n);
 		if (checks->x == 1 || checks->x == n - 1)
-		{
-			prob ? 0 : ft_putchar_fd('+', 2);
-			continue ;
-		}
+			break ;
 		while (checks->r - 1)
 		{
 			checks->x = (checks->x * checks->x) % n;
