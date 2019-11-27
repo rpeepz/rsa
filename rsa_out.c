@@ -61,9 +61,9 @@ void			rsa_encode_out(t_rsa_out rsa, t_rsa gg)
 			buf[i + 2] = 0x00;
 		i++;
 	}
-	ft_putstr_fd(PRIV_BEGIN_HEADER, rsa.fd_out);
+	ft_putstr_fd(PRIV_BEG, rsa.fd_out);
 	base64_nstr_fd(buf, len, rsa.fd_out);
-	ft_putstr_fd(PRIV_END_HEADER, rsa.fd_out);
+	ft_putstr_fd(PRIV_END, rsa.fd_out);
 	// rsa_text_out(rsa, gg);
 	close(rsa.fd_out);
 }

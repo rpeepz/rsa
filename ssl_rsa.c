@@ -30,15 +30,15 @@ int				check_utl_arg(t_rsa_out *rsa, char *arg)
 int				check_rsa_arg(t_rsa_out *rsa, char *arg)
 {
 	if (!ft_strcmp(arg, "text"))
-		rsa->flag |= 0x4;
+		rsa->flag |= R_TEXT;
 	else if (!ft_strcmp(arg, "noout"))
-		rsa->flag |= 0x8;
+		rsa->flag |= R_NOOUT;
 	else if (!ft_strcmp(arg, "check"))
-		rsa->flag |= 0x10;
+		rsa->flag |= R_CHECK;
 	else if (!ft_strcmp(arg, "pubin"))
-		rsa->flag |= 0x20;
+		rsa->flag |= R_PUBIN;
 	else if (!ft_strcmp(arg, "pubout"))
-		rsa->flag |= 0x40;
+		rsa->flag |= R_PUBOUT;
 	else
 		return (1);
 	return (0);
@@ -48,28 +48,27 @@ int				valid_arg(t_ssl *ssl, t_rsa_out *rsa, char *arg, char *filename)
 {
 	if ((rsa->fd_out == 1) && !ft_strcmp(arg, "out"))
 	{
-		rsa->flag |= 0x1;
+		rsa->flag |= F_OUT;
 		IF_RETURN(!filename, 1);
 	}
 	else if (ssl->type == 31)
 		return (1);
 	else if (!ft_strcmp(arg, "in"))
 	{
-		rsa->flag |= 0x2;
+		rsa->flag |= F_IN;
 		IF_RETURN(!filename || open(filename, O_RDONLY) < 3, 1);
 	}
 	else if (ssl->type == 32)
 	{
 		if (!ft_strcmp(arg, "inkey"))
 		{
-			rsa->flag |= 0x4;
+			rsa->flag |= F_INK;
 			IF_RETURN(!filename || open(filename, O_RDONLY) < 3, 1);
 		}
-		else if (check_utl_arg(rsa, arg))
-			return (1);
+		return (check_utl_arg(rsa, arg));
 	}
 	else if (ssl->type == 33)
-		IF_RETURN(check_rsa_arg(rsa, arg), 1);
+		return (check_rsa_arg(rsa, arg));
 	return (0);
 }
 
@@ -91,9 +90,9 @@ int				parse_rsa(char **av, t_ssl *ssl, t_rsa_out *rsa, int i)
 				return (ft_error(6, &av[i][1], ssl));
 			else if (rsa->fd_out == 1 && rsa->flag & 0x1)
 				rsa->fd_out = open(av[++i], O_RDWR | O_CREAT | O_TRUNC, 0644);
-			else if (ssl->type > 31 && (!rsa->fd_in) && (rsa->flag & 0x2))
+			else if (ssl->type > 31 && (!rsa->fd_in) && (rsa->flag & F_IN))
 				rsa->fd_in = open(av[++i], O_RDONLY);
-			else if (ssl->type == 32 && (!rsa->fd_inkey) && (rsa->flag & 0x4))
+			else if (ssl->type == 32 && (!rsa->fd_inkey) && (rsa->flag & F_INK))
 				rsa->fd_inkey = open(av[++i], O_RDONLY);
 		}
 		else
@@ -118,7 +117,7 @@ void			ssl_rsa(char **av, t_ssl *ssl)
 	}
 	if (ssl->type == 31 && rsa.bits > 15)
 		genrsa(rsa);
-	else if (!av[2] && (ssl->flag = 'Z'))
+	else if (!av[2] && ssl->type != 33 && (ssl->flag = 'Z'))
 		ft_error(6, av[1], ssl);
 	else if (ssl->type == 32)
 		;//rsa_util(rsa);
