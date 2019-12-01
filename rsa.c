@@ -13,32 +13,22 @@
 #include "rsa.h"
 #include "encode.h"
 
-void			assign(t_rsa_out rsa, t_rsa *gg, int mode)
+int			assign(uint8_t *decoded, t_rsa *gg, int decode_len, int mode)
 {
-	(void)rsa;
+	int			i;
+
+	i = 0;
 	(void)gg;
 	(void)mode;
-}
-
-/*
-while (++i < total)
+	while (i < decode_len)
 	{
-		base64->str[4 * i] = g_decode_base64[base64->str[4 * i]];
-		base64->str[4 * i + 1] = g_decode_base64[base64->str[4 * i + 1]];
-		base64->decode[3 * i] |= (base64->str[4 * i] << 2);
-		base64->decode[3 * i] |= ((base64->str[4 * i + 1] & 0x30) >> 4);
-		if (base64->str[4 * i + 2] == '=')
-			continue ;
-		base64->str[4 * i + 2] = g_decode_base64[base64->str[4 * i + 2]];
-		base64->decode[3 * i + 1] |= ((base64->str[4 * i + 1] & 0x0F) << 4);
-		base64->decode[3 * i + 1] |= (base64->str[4 * i + 2] >> 2);
-		if (base64->str[4 * i + 3] == '=')
-			continue ;
-		base64->str[4 * i + 3] = g_decode_base64[base64->str[4 * i + 3]];
-		base64->decode[3 * i + 2] |= (base64->str[4 * i + 2] << 6);
-		base64->decode[3 * i + 2] |= base64->str[4 * i + 3];
+		//decode key and save in gg
+		ft_printf("[%x]", decoded[i]);
+		i++;
 	}
-*/
+	ft_memdel((void**)&decoded);
+	return (i < decode_len ? 1 : 0);
+}
 
 int				validate_key(char *buf, int flag, t_rsa *gg)
 {
@@ -52,17 +42,10 @@ int				validate_key(char *buf, int flag, t_rsa *gg)
 	decode_len = (((float)seq_decode[1] / 3.0) * 4.0);
 	decoded = ft_memalloc((int)decode_len);
 	n += base64_decode((uint8_t *)buf + n, decoded, (int)decode_len);
-	for (int i = 0; i <  (int)(decode_len / 4 * 3) - 1; i++)
-	{
-		ft_printf("[%x]", decoded[i]);
-	}
-	ft_printf("\n");
-	// (void)lines;
-	(void)flag;
-	//decode ?
-	ft_strdel(&decoded);
-	return (n + 1); //success on valid line of key
-	return (0); //err: expecting public or private key
+	decode_len = (int)((decode_len / 4.0) * 3.0);
+	if (assign(decoded, gg, (int)decode_len, flag))
+		return (0); //err: bad key
+	return (n + 1); //success valid key
 }
 
 int				read_key(char *buf, int fd, int flag, t_rsa *gg)
