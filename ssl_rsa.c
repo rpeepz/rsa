@@ -44,26 +44,26 @@ int				check_rsa_arg(t_rsa_out *rsa, char *arg)
 	return (0);
 }
 
-int				valid_arg(t_ssl *ssl, t_rsa_out *rsa, char *arg, char *filename)
+int				valid_arg(t_ssl *ssl, t_rsa_out *rsa, char *arg, char *fname)
 {
 	if ((rsa->fd_out == 1) && !ft_strcmp(arg, "out"))
 	{
 		rsa->flag |= F_OUT;
-		IF_RETURN(!filename, 1);
+		IF_RETURN(!fname, 1);
 	}
 	else if (ssl->type == 31)
 		return (1);
 	else if (!ft_strcmp(arg, "in"))
 	{
 		rsa->flag |= F_IN;
-		IF_RETURN(!filename || open(filename, O_RDONLY) < 3, 1);
+		IF_RETURN(!fname || open_file_to_fd(&ssl->fd[254], fname, 0), 1);
 	}
 	else if (ssl->type == 32)
 	{
 		if (!ft_strcmp(arg, "inkey"))
 		{
 			rsa->flag |= F_INK;
-			IF_RETURN(!filename || open(filename, O_RDONLY) < 3, 1);
+			IF_RETURN(!fname || open_file_to_fd(&ssl->fd[254], fname, 0), 1);
 		}
 		return (check_utl_arg(rsa, arg));
 	}
@@ -89,11 +89,11 @@ int				parse_rsa(char **av, t_ssl *ssl, t_rsa_out *rsa, int i)
 			if (valid_arg(ssl, rsa, &av[i][1], av[i + 1]))
 				return (ft_error(6, &av[i][1], ssl));
 			else if (rsa->fd_out == 1 && rsa->flag & 0x1)
-				rsa->fd_out = open(av[++i], O_RDWR | O_CREAT | O_TRUNC, 0644);
+				open_file_to_fd(&rsa->fd_out, av[++i], 1);
 			else if (ssl->type > 31 && (!rsa->fd_in) && (rsa->flag & F_IN))
-				rsa->fd_in = open(av[++i], O_RDONLY);
+				open_file_to_fd(&rsa->fd_in, av[++i], 0);
 			else if (ssl->type == 32 && (!rsa->fd_inkey) && (rsa->flag & F_INK))
-				rsa->fd_inkey = open(av[++i], O_RDONLY);
+				open_file_to_fd(&rsa->fd_inkey, av[++i], 0);
 		}
 		else
 			return (1);
