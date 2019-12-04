@@ -32,7 +32,8 @@ void			rsa_text_out(t_rsa_out rsa, t_rsa gg)
 	ft_bzero(buf, PAGESIZE);
 	ft_sprintf(buf, "%s-Key: (%d bit)\n",
 	rsa.flag & R_PUBIN ? "Public" : "Private", rsa.bits);
-	ft_sprintf(&buf[ft_strlen(buf)], "modulus: %llu (%#llx)\n", gg.n, gg.n);
+	ft_sprintf(&buf[ft_strlen(buf)], "%codulus: %llu (%#llx)\n",\
+	rsa.flag & R_PUBIN ? 'M' : 'm', gg.n, gg.n);
 	ft_sprintf(&buf[ft_strlen(buf)], "%sxponent: %llu (%#llx)\n",
 	rsa.flag & R_PUBIN ? "E" : "publicE", gg.e, gg.e);
 	if (!(rsa.flag & R_PUBIN))
@@ -61,21 +62,20 @@ void			rsa_encode_out(t_rsa_out rsa, t_rsa gg)
 	ft_bzero(buf, PAGESIZE);
 	ft_bzero(buf2, 10);
 	len = 0;
-	i = 0;
-	rsa.flag & R_PUBOUT ? asn1_pub(gg, buf, buf2, &len) :\
-	asn1(gg, buf, buf2, &len);
+	(rsa.flag & R_PUBOUT || rsa.flag & R_PUBIN) ?\
+	asn1_pub(gg, buf, buf2, &len) : asn1(gg, buf, buf2, &len);
 	DEBUG ? ft_printf("asn1 len:[%d]\n", len) : 0;
-	rsa.flag & R_PUBOUT ? buf[16] = 0x00 : 0;
-	rsa.flag & R_PUBOUT ? buf[19] = 0x00 : 0;
-	while (i < len)
-	{
+	(rsa.flag & R_PUBOUT || rsa.flag & R_PUBIN) ? buf[16] = 0x00 : 0;
+	(rsa.flag & R_PUBOUT || rsa.flag & R_PUBIN) ? buf[19] = 0x00 : 0;
+	i = -1;
+	while (++i < len)
 		if (buf[i] == 0x02 && buf[i + 2] == 0xFF)
 			buf[i + 2] = 0x00;
-		i++;
-	}
-	ft_putstr_fd(rsa.flag & R_PUBOUT ? PUB_BEG : PRIV_BEG, rsa.fd_out);
+	ft_putstr_fd((rsa.flag & R_PUBOUT || rsa.flag & R_PUBIN) ?\
+	PUB_BEG : PRIV_BEG, rsa.fd_out);
 	base64_nstr_fd(buf, len, rsa.fd_out);
-	ft_putstr_fd(rsa.flag & R_PUBOUT ? PUB_END : PRIV_END, rsa.fd_out);
+	ft_putstr_fd((rsa.flag & R_PUBOUT || rsa.flag & R_PUBIN) ?\
+	PUB_END : PRIV_END, rsa.fd_out);
 	rsa.fd_out > 1 ? close(rsa.fd_out) : 0;
 }
 
@@ -93,9 +93,8 @@ void			rsa_out_options(t_rsa_out rsa, t_rsa gg, char option)
 		ft_putstr_fd("writing RSA key\n", 2);
 		rsa_encode_out(rsa, gg);
 	}
-	else if (option == 'c')
+	else if (option == 'c' && (option = 0))
 	{
-		option = 0;
 		if ((gg.p * gg.q != gg.n) && (option |= 0x1))
 			ft_putstr_fd("RSA key error: n does not equal p q\n", rsa.fd_out);
 		if (!(ft_is_primary(gg.p, 9.0F)) && (option |= 0x1))
