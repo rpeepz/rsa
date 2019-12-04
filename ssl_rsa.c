@@ -15,13 +15,13 @@
 int				check_utl_arg(t_rsa_out *rsa, char *arg)
 {
 	if (!ft_strcmp(arg, "pubin"))
-		rsa->flag |= 0x8;
+		rsa->flag |= R_PUBIN;
 	else if (!ft_strcmp(arg, "encrypt"))
-		rsa->flag |= 0x10;
+		rsa->flag |= R_ENCRYPT;
 	else if (!ft_strcmp(arg, "decrypt"))
-		rsa->flag |= 0x20;
+		rsa->flag |= R_DECRYPT;
 	else if (!ft_strcmp(arg, "hexdump"))
-		rsa->flag |= 0x40;
+		rsa->flag |= R_HEXDUMP;
 	else
 		return (1);
 	return (0);
@@ -122,8 +122,8 @@ void			ssl_rsa(char **av, t_ssl *ssl)
 		genrsa(rsa);
 	else if (!av[2] && ssl->type != 33 && (ssl->flag = 'Z'))
 		ft_error(6, av[1], ssl);
-	else if (ssl->type == 32)
-		;//rsa_util(rsa);
+	else if (ssl->type == 32 && (rsa.type = 1))
+		rsautl(rsa, rsa_command(rsa));
 	else if (ssl->type == 33)
 		rsa_command(rsa);
 	else if (ssl->type == 36)
