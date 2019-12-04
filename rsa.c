@@ -77,20 +77,17 @@ int				validate_key(char *buf, t_rsa *gg, int flag)
 	decode_len = (((float)seq_decode[1] / 3.0) * 4.0);
 	decoded = ft_memalloc((int)decode_len);
 	n += base64_decode((uint8_t *)buf + n, decoded, (int)decode_len);
-	if (n <= 64 ? ((ft_strchri(buf, '-') - 1) % 4) :\
-	((n + 1 != ft_strchri(buf, '-')) || ((n - (65 * (n / 64))) % 4)))
-	{
-		ft_error(flag ? 7 : 8, NULL, NULL);
+	if (buf[n + 1] != '-')
+		return (0);
+	if ((n <= 64 ? ((ft_strchri(buf, '-') - 1) % 4) :\
+	((n + 1 != ft_strchri(buf, '-')) || ((n - (65 * (n / 64))) % 4))) &&\
+		ft_error(flag ? 7 : 8, NULL, NULL))
 		return ((buf[0] = 0));
-	}
 	decode_len = (int)((decode_len / 4.0) * 3.0);
 	if (assign(decoded, gg, (int)decode_len, flag))
-		return (0); //err: bad key
-	if (get_value(gg, 0, flag))
-	{
-		ft_error(flag ? 13 : 14, NULL, NULL);
+		return (0);
+	if (get_value(gg, 0, flag) && ft_error(flag ? 13 : 14, NULL, NULL))
 		return ((buf[0] = 0));
-	}
 	return (n <= 64 ? ft_strchri(buf, '-') : n + 1);
 }
 
@@ -105,18 +102,16 @@ int				read_key(char *buf, t_rsa *gg, int flag, int fd)
 	{
 		buf += ft_strchri(buf, '\n');
 		buf += ft_strchri(buf, '-');
-		if (ft_strncmp(buf, flag ? PUB_BEG : PRIV_BEG, flag ? 27 : 32))
-		{
-			ft_error(flag ? 9 : 10, NULL, NULL);
+		if (ft_strncmp(buf, flag ? PUB_BEG : PRIV_BEG, flag ? 27 : 32) &&\
+			ft_error(flag ? 9 : 10, NULL, NULL))
 			return (ft_printf("%s", flag ? EXPECT_PUB : EXPECT_PRV));
-		}
 	}
 	buf += flag ? 27 : 32;
 	if (!*buf)
-		return (1); //err "input full key, not line by line"
+		return (ft_error(flag ? 11 : 12, NULL, NULL));
 	buf += validate_key(buf, gg, flag);
 	if (!*buf)
-		return (ft_printf("err\n"));
+		return (1);
 	if (ft_strncmp(buf, flag ? PUB_END : PRIV_END, flag ? 25 : 30))
 		return (ft_error(flag ? 11 : 12, NULL, NULL));
 	return (0);
