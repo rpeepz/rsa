@@ -79,13 +79,6 @@ void			rsa_encode_out(t_rsa_out rsa, t_rsa gg)
 	rsa.fd_out > 1 ? close(rsa.fd_out) : 0;
 }
 
-/*
-**	TODO
-**	checks to make for `CHECK` flag
-**	dmp1 not congruent to d
-**	iqmp not inverse of q
-*/
-
 void			rsa_out_options(t_rsa_out rsa, t_rsa gg, char option)
 {
 	if (option == 'o')
@@ -93,7 +86,7 @@ void			rsa_out_options(t_rsa_out rsa, t_rsa gg, char option)
 		ft_putstr_fd("writing RSA key\n", 2);
 		rsa_encode_out(rsa, gg);
 	}
-	else if (option == 'c' && (option = 0))
+	else if (option == 'c' && !(option = 0))
 	{
 		if ((gg.p * gg.q != gg.n) && (option |= 0x1))
 			ft_putstr_fd("RSA key error: n does not equal p q\n", rsa.fd_out);
@@ -102,6 +95,11 @@ void			rsa_out_options(t_rsa_out rsa, t_rsa gg, char option)
 		if (!(ft_is_primary(gg.q, 9.0F)) && (option |= 0x1))
 			ft_putstr_fd("RSA key error: q not prime\n", rsa.fd_out);
 		if ((0) && (option |= 0x1))
+			ft_putstr_fd("RSA key error: d e not congruent to 1\n", rsa.fd_out);
+		if (mulmod(gg.q, gg.iqmp, gg.p) != 1 && (option |= 0x1))
+			ft_putstr_fd("RSA key error: iqmp not inverse of q\n", rsa.fd_out);
+		if ((mulmod(gg.dmp1, gg.e, gg.p - 1) != 1 ||\
+			mulmod(gg.dmq1, gg.e, gg.q - 1) != 1) && (option |= 0x1))
 			ft_putstr_fd("RSA key error: d e not congruent to 1\n", rsa.fd_out);
 	}
 	if (!option)
