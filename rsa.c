@@ -117,7 +117,7 @@ int				read_key(char *buf, t_rsa *gg, int flag, int fd)
 	return (0);
 }
 
-void			rsa_command(t_rsa_out rsa)
+t_rsa			rsa_command(t_rsa_out rsa)
 {
 	t_rsa		gg;
 	char		buf[PAGESIZE];
@@ -125,12 +125,12 @@ void			rsa_command(t_rsa_out rsa)
 
 	ft_bzero(&gg, sizeof(t_rsa));
 	rsa.bits = 0;
-	if (read_key(buf, &gg, rsa.flag, rsa.fd_in))
-		return ;
+	if (read_key(buf, &gg, rsa.flag, rsa.type ? rsa.fd_inkey : rsa.fd_in))
+		return (gg);
 	tmp = gg.n;
 	while (tmp && ++rsa.bits)
 		tmp >>= 1;
-	if (rsa.flag & R_TEXT)
+	if (!rsa.type && rsa.flag & R_TEXT)
 		rsa_text_out(rsa, gg);
 	if (rsa.flag & R_MODULUS)
 	{
@@ -140,6 +140,7 @@ void			rsa_command(t_rsa_out rsa)
 	}
 	if (rsa.flag & R_CHECK)
 		rsa_out_options(rsa, gg, 'c');
-	if (!(rsa.flag & R_NOOUT))
+	if (!rsa.type && !(rsa.flag & R_NOOUT))
 		rsa_out_options(rsa, gg, 'o');
+	return (gg);
 }
