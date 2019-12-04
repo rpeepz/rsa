@@ -79,7 +79,8 @@ static int		witness(__uint64_t n, t_primary *checks, int prob)
 				break ;
 			--checks->r;
 		}
-		IF_RETURN(!(checks->r - 1) && !(checks->a[i + 1]), 0);
+		if (!(checks->r - 1) && !(checks->a[i + 1]))
+			return (0);
 	}
 	prob ? 0 : ft_putchar_fd('+', 2);
 	return (1);
