@@ -39,6 +39,8 @@ int				check_rsa_arg(t_rsa_out *rsa, char *arg)
 		rsa->flag |= R_PUBIN;
 	else if (!ft_strcmp(arg, "pubout"))
 		rsa->flag |= R_PUBOUT;
+	else if (!ft_strcmp(arg, "modulus"))
+		rsa->flag |= R_MODULUS;
 	else
 		return (1);
 	return (0);
@@ -49,21 +51,22 @@ int				valid_arg(t_ssl *ssl, t_rsa_out *rsa, char *arg, char *fname)
 	if ((rsa->fd_out == 1) && !ft_strcmp(arg, "out"))
 	{
 		rsa->flag |= F_OUT;
-		IF_RETURN(!fname, 1);
+		return (!fname ? 1 : 0);
 	}
 	else if (ssl->type == 31)
 		return (1);
 	else if (!ft_strcmp(arg, "in"))
 	{
 		rsa->flag |= F_IN;
-		IF_RETURN(!fname || open_file_to_fd(&ssl->fd[254], fname, 0), 1);
+		return ((!fname || open_file_to_fd(&ssl->fd[254], fname, 0)) ? 1 : 0);
 	}
 	else if (ssl->type == 32)
 	{
 		if (!ft_strcmp(arg, "inkey"))
 		{
 			rsa->flag |= F_INK;
-			IF_RETURN(!fname || open_file_to_fd(&ssl->fd[254], fname, 0), 1);
+			return ((!fname || open_file_to_fd(&ssl->fd[254], fname, 0)) ?\
+			1 : 0);
 		}
 		return (check_utl_arg(rsa, arg));
 	}
@@ -96,7 +99,7 @@ int				parse_rsa(char **av, t_ssl *ssl, t_rsa_out *rsa, int i)
 				open_file_to_fd(&rsa->fd_inkey, av[++i], 0);
 		}
 		else
-			return (1);
+			return (ft_error(6, av[i], ssl));
 	}
 	return (0);
 }
