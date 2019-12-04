@@ -30,15 +30,24 @@ void			rsa_text_out(t_rsa_out rsa, t_rsa gg)
 	char	buf[PAGESIZE];
 
 	ft_bzero(buf, PAGESIZE);
-	ft_sprintf(buf, "Private-Key: (%d bit)\n", rsa.bits);
-	ft_sprintf(&buf[LEN(buf)], "modulus: %llu (%#llx)\n", gg.n, gg.n);
-	ft_sprintf(&buf[LEN(buf)], "publicExponent: %llu (%#llx)\n", gg.e, gg.e);
-	ft_sprintf(&buf[LEN(buf)], "privateExponent: %llu (%#llx)\n", gg.d, gg.d);
-	ft_sprintf(&buf[LEN(buf)], "prime1: %llu (%#llx)\n", gg.p, gg.p);
-	ft_sprintf(&buf[LEN(buf)], "prime2: %llu (%#llx)\n", gg.q, gg.q);
-	ft_sprintf(&buf[LEN(buf)], "exponent1: %llu (%#llx)\n", gg.dmp1, gg.dmp1);
-	ft_sprintf(&buf[LEN(buf)], "exponent2: %llu (%#llx)\n", gg.dmq1, gg.dmq1);
-	ft_sprintf(&buf[LEN(buf)], "coefficient: %llu (%#llx)\n", gg.iqmp, gg.iqmp);
+	ft_sprintf(buf, "%s-Key: (%d bit)\n",
+	rsa.flag & R_PUBIN ? "Public" : "Private", rsa.bits);
+	ft_sprintf(&buf[ft_strlen(buf)], "modulus: %llu (%#llx)\n", gg.n, gg.n);
+	ft_sprintf(&buf[ft_strlen(buf)], "%sxponent: %llu (%#llx)\n",
+	rsa.flag & R_PUBIN ? "E" : "publicE", gg.e, gg.e);
+	if (!(rsa.flag & R_PUBIN))
+	{
+		ft_sprintf(&buf[ft_strlen(buf)],
+		"privateExponent: %llu (%#llx)\n", gg.d, gg.d);
+		ft_sprintf(&buf[ft_strlen(buf)], "prime1: %llu (%#llx)\n", gg.p, gg.p);
+		ft_sprintf(&buf[ft_strlen(buf)], "prime2: %llu (%#llx)\n", gg.q, gg.q);
+		ft_sprintf(&buf[ft_strlen(buf)],
+		"exponent1: %llu (%#llx)\n", gg.dmp1, gg.dmp1);
+		ft_sprintf(&buf[ft_strlen(buf)],
+		"exponent2: %llu (%#llx)\n", gg.dmq1, gg.dmq1);
+		ft_sprintf(&buf[ft_strlen(buf)],
+		"coefficient: %llu (%#llx)\n", gg.iqmp, gg.iqmp);
+	}
 	ft_putstr_fd(buf, rsa.fd_out);
 }
 
@@ -53,6 +62,7 @@ void			rsa_encode_out(t_rsa_out rsa, t_rsa gg)
 	ft_bzero(buf2, 10);
 	len = 0;
 	i = 0;
+	rsa.flag & R_PUBOUT ? asn1_pub(gg, buf, buf2, &len) :\
 	asn1(gg, buf, buf2, &len);
 	DEBUG ? ft_printf("asn1 len:[%d]\n", len) : 0;
 	while (i < len)
@@ -61,9 +71,38 @@ void			rsa_encode_out(t_rsa_out rsa, t_rsa gg)
 			buf[i + 2] = 0x00;
 		i++;
 	}
-	ft_putstr_fd(PRIV_BEG, rsa.fd_out);
+	ft_putstr_fd(rsa.flag & R_PUBOUT ? PUB_BEG : PRIV_BEG, rsa.fd_out);
 	base64_nstr_fd(buf, len, rsa.fd_out);
-	ft_putstr_fd(PRIV_END, rsa.fd_out);
-	// rsa_text_out(rsa, gg);
-	close(rsa.fd_out);
+	ft_putstr_fd(rsa.flag & R_PUBOUT ? PUB_END : PRIV_END, rsa.fd_out);
+	rsa.fd_out > 1 ? close(rsa.fd_out) : 0;
+}
+
+/*
+**	TODO
+**	checks to make for `CHECK` flag
+**	dmp1 not congruent to d
+**	iqmp not inverse of q
+*/
+
+void			rsa_out_options(t_rsa_out rsa, t_rsa gg, char option)
+{
+	if (option == 'o')
+	{
+		ft_putstr_fd("writing RSA key\n", 2);
+		rsa_encode_out(rsa, gg);
+	}
+	else if (option == 'c')
+	{
+		option = 0;
+		if ((gg.p * gg.q != gg.n) && (option |= 0x1))
+			ft_putstr_fd("RSA key error: n does not equal p q\n", rsa.fd_out);
+		if (!(ft_is_primary(gg.p, 9.0F)) && (option |= 0x1))
+			ft_putstr_fd("RSA key error: p not prime\n", rsa.fd_out);
+		if (!(ft_is_primary(gg.q, 9.0F)) && (option |= 0x1))
+			ft_putstr_fd("RSA key error: q not prime\n", rsa.fd_out);
+		if ((0) && (option |= 0x1))
+			ft_putstr_fd("RSA key error: d e not congruent to 1\n", rsa.fd_out);
+	}
+	if (!option)
+		ft_putstr_fd("RSA key ok\n", rsa.fd_out);
 }

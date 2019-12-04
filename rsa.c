@@ -13,24 +13,59 @@
 #include "rsa.h"
 #include "encode.h"
 
-int			assign(uint8_t *decoded, t_rsa *gg, int decode_len, int mode)
+int				get_value(t_rsa *gg, __uint64_t value, int flag)
+{
+	if (!gg->n)
+		gg->n = value;
+	else if (!gg->e)
+		gg->e = value;
+	else if (!gg->d && !(flag))
+		gg->d = value;
+	else if (!gg->p && !(flag))
+		gg->p = value;
+	else if (!gg->q && !(flag))
+		gg->q = value;
+	else if (!gg->dmp1 && !(flag))
+		gg->dmp1 = value;
+	else if (!gg->dmq1 && !(flag))
+		gg->dmq1 = value;
+	else if (!gg->iqmp && !(flag))
+		gg->iqmp = value;
+	else
+		return (0);
+	return (1);
+}
+
+int				assign(uint8_t *decoded, t_rsa *gg, int decode_len, int flag)
 {
 	int			i;
+	int			len;
+	__uint64_t	value;
 
 	i = 0;
-	(void)gg;
-	(void)mode;
+	while (decoded[i] != 0x2)
+		++i;
 	while (i < decode_len)
 	{
-		//decode key and save in gg
-		ft_printf("[%x]", decoded[i]);
-		i++;
+		len = 0;
+		if (decoded[i++] == 0x2)
+		{
+			len = decoded[i];
+			value = 0;
+			while (len--)
+			{
+				if (value)
+					value <<= 8;
+				value += decoded[++i];
+			}
+			get_value(gg, value, flag);
+		}
 	}
 	ft_memdel((void**)&decoded);
 	return (i < decode_len ? 1 : 0);
 }
 
-int				validate_key(char *buf, int flag, t_rsa *gg)
+int				validate_key(char *buf, t_rsa *gg, int flag)
 {
 	uint8_t		seq_decode[3];
 	uint8_t		*decoded;
@@ -42,51 +77,74 @@ int				validate_key(char *buf, int flag, t_rsa *gg)
 	decode_len = (((float)seq_decode[1] / 3.0) * 4.0);
 	decoded = ft_memalloc((int)decode_len);
 	n += base64_decode((uint8_t *)buf + n, decoded, (int)decode_len);
+	if (n <= 64 ? ((ft_strchri(buf, '-') - 1) % 4) :\
+	((n + 1 != ft_strchri(buf, '-')) || ((n - (65 * (n / 64))) % 4)))
+	{
+		ft_error(flag ? 7 : 8, NULL, NULL);
+		return ((buf[0] = 0));
+	}
 	decode_len = (int)((decode_len / 4.0) * 3.0);
 	if (assign(decoded, gg, (int)decode_len, flag))
 		return (0); //err: bad key
-	return (n + 1); //success valid key
+	if (get_value(gg, 0, flag))
+	{
+		ft_error(flag ? 13 : 14, NULL, NULL);
+		return ((buf[0] = 0));
+	}
+	return (n <= 64 ? ft_strchri(buf, '-') : n + 1);
 }
 
-int				read_key(char *buf, int fd, int flag, t_rsa *gg)
+int				read_key(char *buf, t_rsa *gg, int flag, int fd)
 {
+	if (flag & R_CHECK && flag & R_PUBIN)
+		return (ft_error(20, NULL, NULL));
+	ft_bzero(buf, PAGESIZE);
 	read(fd, buf, PAGESIZE);
-	if (ft_strncmp(buf, flag & R_PUBIN ? PUB_BEG : PRIV_BEG,\
-	flag & R_PUBIN ? 27 : 32))
+	flag = flag & R_PUBIN ? 1 : 0;
+	if (ft_strncmp(buf, flag ? PUB_BEG : PRIV_BEG, flag ? 27 : 32))
 	{
-		ft_printf("%s, bad header\n", flag & R_PUBIN ? "expecting public key" :\
-		"expecting private key");
-		return (ft_error(0, 0, 0)); //return err: bad header
+		buf += ft_strchri(buf, '\n');
+		buf += ft_strchri(buf, '-');
+		if (ft_strncmp(buf, flag ? PUB_BEG : PRIV_BEG, flag ? 27 : 32))
+		{
+			ft_error(flag ? 9 : 10, NULL, NULL);
+			return (ft_printf("%s", flag ? EXPECT_PUB : EXPECT_PRV));
+		}
 	}
-	buf += flag & R_PUBIN ? 27 : 32;
+	buf += flag ? 27 : 32;
 	if (!*buf)
-		return (ft_error(0, 0, 0)); //err input full key, not line by line
-	buf += validate_key(buf, flag, gg);
-	if (ft_strncmp(buf, flag & R_PUBIN ? PUB_END : PRIV_END,\
-	flag & R_PUBIN ? 25 : 30))
-		ft_printf("%s, bad header\n", flag & R_PUBIN ? "expecting public key" :\
-		"expecting private key");
-		return (ft_error(0, 0, 0)); //return err: bad header
+		return (1); //err "input full key, not line by line"
+	buf += validate_key(buf, gg, flag);
+	if (!*buf)
+		return (ft_printf("err\n"));
+	if (ft_strncmp(buf, flag ? PUB_END : PRIV_END, flag ? 25 : 30))
+		return (ft_error(flag ? 11 : 12, NULL, NULL));
 	return (0);
 }
-
 
 void			rsa_command(t_rsa_out rsa)
 {
 	t_rsa		gg;
 	char		buf[PAGESIZE];
+	__uint64_t	tmp;
 
 	ft_bzero(&gg, sizeof(t_rsa));
-	ft_bzero(buf, PAGESIZE);
-	if (read_key(buf, rsa.fd_in, rsa.flag, &gg))
-		ft_error(0, 0, 0); //err reading key
-	else if (rsa.flag & R_NOOUT)
+	rsa.bits = 0;
+	if (read_key(buf, &gg, rsa.flag, rsa.fd_in))
 		return ;
-	else if (rsa.flag & R_CHECK)
-		;
-	else if (rsa.flag & R_TEXT)
-		;//decode(rsa, &gg, 1);
-	else if (rsa.flag & R_PUBOUT)
-		;//decode(rsa, &gg, 2);
-	rsa_text_out(rsa, gg);
+	tmp = gg.n;
+	while (tmp && ++rsa.bits)
+		tmp >>= 1;
+	if (rsa.flag & R_TEXT)
+		rsa_text_out(rsa, gg);
+	if (rsa.flag & R_MODULUS)
+	{
+		ft_bzero(buf, PAGESIZE);
+		ft_sprintf(buf, "Modulus=%llX\n", gg.n);
+		ft_putstr_fd(buf, rsa.fd_out);
+	}
+	if (rsa.flag & R_CHECK)
+		rsa_out_options(rsa, gg, 'c');
+	if (!(rsa.flag & R_NOOUT))
+		rsa_out_options(rsa, gg, 'o');
 }
