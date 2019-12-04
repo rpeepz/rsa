@@ -65,6 +65,8 @@ void			rsa_encode_out(t_rsa_out rsa, t_rsa gg)
 	rsa.flag & R_PUBOUT ? asn1_pub(gg, buf, buf2, &len) :\
 	asn1(gg, buf, buf2, &len);
 	DEBUG ? ft_printf("asn1 len:[%d]\n", len) : 0;
+	rsa.flag & R_PUBOUT ? buf[16] = 0x00 : 0;
+	rsa.flag & R_PUBOUT ? buf[19] = 0x00 : 0;
 	while (i < len)
 	{
 		if (buf[i] == 0x02 && buf[i + 2] == 0xFF)
