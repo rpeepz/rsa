@@ -6,7 +6,7 @@
 /*   By: rpapagna <rpapagna@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/10/12 18:59:43 by rpapagna          #+#    #+#             */
-/*   Updated: 2019/11/04 20:54:31 by rpapagna         ###   ########.fr       */
+/*   Updated: 2019/12/05 18:19:03 by rpapagna         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,15 +120,15 @@ void			ssl_rsa(char **av, t_ssl *ssl)
 	}
 	if (ssl->type == 31 && rsa.bits > 15)
 		genrsa(rsa);
-	else if (!av[2] && ssl->type != 33 && (ssl->flag = 'Z'))
-		ft_error(6, av[1], ssl);
+	else if ((!av[2] && ssl->type == 36) ||\
+	(ssl->type == 32 && !(rsa.flag & F_INK)))
+		ft_error(rsa.flag & R_PUBIN ? 23 : 24, av[1], ssl);
 	else if (ssl->type == 32 && (rsa.type = 1))
 		rsautl(rsa, rsa_command(rsa));
 	else if (ssl->type == 33)
 		rsa_command(rsa);
 	else if (ssl->type == 36)
-		ft_is_primary(ft_atoull(av[2]), 9.0F) ?
-		ft_printf("%llu is prime.\n", ft_atoull(av[2])) :
-		ft_printf("%llu is composite.\n", ft_atoull(av[2]));
+		ft_printf("%llu is %s.\n", ft_atoull(av[2]),
+		ft_is_primary(ft_atoull(av[2]), 9.0F) ? "prime" : "composite");
 	DEBUG ? debug_output(ssl, rsa) : 0;
 }
