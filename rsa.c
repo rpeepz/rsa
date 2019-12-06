@@ -6,7 +6,7 @@
 /*   By: rpapagna <rpapagna@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/11/03 19:09:32 by rpapagna          #+#    #+#             */
-/*   Updated: 2019/11/17 21:02:21 by rpapagna         ###   ########.fr       */
+/*   Updated: 2019/12/05 18:17:57 by rpapagna         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,11 +77,11 @@ int				validate_key(char *buf, t_rsa *gg, int flag)
 	decode_len = (((float)seq_decode[1] / 3.0) * 4.0);
 	decoded = ft_memalloc((int)decode_len);
 	n += base64_decode((uint8_t *)buf + n, decoded, (int)decode_len);
-	if (buf[n + 1] != '-')
+	if (buf[n + 1] != '-' && ft_pipewrench("-s", &decoded))
 		return (0);
 	if ((n <= 64 ? ((ft_strchri(buf, '-') - 1) % 4) :\
 	((n + 1 != ft_strchri(buf, '-')) || ((n - (65 * (n / 64))) % 4))) &&\
-		ft_error(flag ? 7 : 8, NULL, NULL))
+		ft_error(flag ? 7 : 8, NULL, NULL) && ft_pipewrench("-s", &decoded))
 		return ((buf[0] = 0));
 	decode_len = (int)((decode_len / 4.0) * 3.0);
 	if (assign(decoded, gg, (int)decode_len, flag))
@@ -125,7 +125,8 @@ t_rsa			rsa_command(t_rsa_out rsa)
 
 	ft_bzero(&gg, sizeof(t_rsa));
 	rsa.bits = 0;
-	if (read_key(buf, &gg, rsa.flag, rsa.type ? rsa.fd_inkey : rsa.fd_in))
+	if ((rsa.flag & R_PUBIN && rsa.flag & R_DECRYPT && ft_error(19, NULL, NULL))
+	|| read_key(buf, &gg, rsa.flag, rsa.type ? rsa.fd_inkey : rsa.fd_in))
 		return (gg);
 	tmp = gg.n;
 	while (tmp && ++rsa.bits)
