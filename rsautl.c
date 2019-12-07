@@ -6,7 +6,7 @@
 /*   By: rpapagna <rpapagna@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/11/04 13:21:29 by rpapagna          #+#    #+#             */
-/*   Updated: 2019/12/05 18:17:26 by rpapagna         ###   ########.fr       */
+/*   Updated: 2019/12/06 21:19:11 by rpapagna         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,8 +31,8 @@ void			print_row_hex(int bytes, int len, __uint8_t *msg, int fd)
 		else
 			write(1, "  ", 2);
 		++i;
-		if (i == 8)
-			ft_putchar_fd('-', fd);
+		if (i % 8 == 0)
+			ft_putchar_fd(i == 8 ? '-' : ' ', fd);
 		ft_putchar_fd(' ', fd);
 	}
 }
