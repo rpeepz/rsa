@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "rsa.h"
+#include "standard.h"
 
 int				check_utl_arg(t_rsa_out *rsa, char *arg)
 {
@@ -46,7 +47,7 @@ int				check_rsa_arg(t_rsa_out *rsa, char *arg)
 	return (0);
 }
 
-int				valid_arg(t_ssl *ssl, t_rsa_out *rsa, char *arg, char *fname)
+static int		valid_arg(t_ssl *ssl, t_rsa_out *rsa, char *arg, char *fname)
 {
 	if ((rsa->fd_out == 1) && !ft_strcmp(arg, "out"))
 	{
@@ -120,15 +121,13 @@ void			ssl_rsa(char **av, t_ssl *ssl)
 	}
 	if (ssl->type == 31 && rsa.bits > 15)
 		genrsa(rsa);
-	else if ((!av[2] && ssl->type == 36) ||\
-	(ssl->type == 32 && !(rsa.flag & F_INK)))
+	else if (ssl->type == 32 && !(rsa.flag & F_INK))
 		ft_error(rsa.flag & R_PUBIN ? 23 : 24, av[1], ssl);
 	else if (ssl->type == 32 && (rsa.type = 1))
 		rsautl(rsa, rsa_command(rsa));
 	else if (ssl->type == 33)
 		rsa_command(rsa);
 	else if (ssl->type == 36)
-		ft_printf("%llu is %s.\n", ft_atoull(av[2]),
-		ft_is_primary(ft_atoull(av[2]), 9.0F) ? "prime" : "composite");
+		prime_command(av, ssl);
 	DEBUG ? debug_output(ssl, rsa) : 0;
 }
