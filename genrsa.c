@@ -67,13 +67,13 @@ __uint64_t		genprime(int bits, int out)
 	return (p);
 }
 
-#include <stdio.h>
 __uint64_t		valid_modulus(t_rsa gg, int bits)
 {
 	__uint64_t	n;
 
 	n = gg.p * gg.q;
-	if ((n / gg.p == gg.q) && n & 1ULL << (bits - 1) && n <= (1ULL << bits))
+	if ((n / gg.p == gg.q) && n & 1ULL << (bits - 1) &&\
+	n <= (bits == 64 ? UINT64_MAX : (1ULL << bits)))
 		return (n);
 	return (1);
 }

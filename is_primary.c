@@ -98,7 +98,6 @@ int				ft_is_primary(__uint64_t number, float probability)
 	t_primary	checks;
 	int			ret;
 
-	(void)probability;
 	if (number == 2 || number == 3)
 		return (1);
 	if (number == 1 || !(number & 0x1))
