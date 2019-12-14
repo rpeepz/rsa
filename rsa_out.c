@@ -6,7 +6,7 @@
 /*   By: rpapagna <rpapagna@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/11/03 18:41:24 by rpapagna          #+#    #+#             */
-/*   Updated: 2019/11/17 19:33:58 by rpapagna         ###   ########.fr       */
+/*   Updated: 2019/12/14 01:29:19 by rpapagna         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,18 +89,16 @@ void			rsa_out_options(t_rsa_out rsa, t_rsa gg, char option)
 	else if (option == 'c' && !(option = 0))
 	{
 		if ((gg.p * gg.q != gg.n) && (option |= 0x1))
-			ft_putstr_fd("RSA key error: n does not equal p q\n", rsa.fd_out);
+			ft_putstr_fd(N_NOT_PQ, rsa.fd_out);
 		if (!(ft_is_primary(gg.p, 9.0F)) && (option |= 0x1))
-			ft_putstr_fd("RSA key error: p not prime\n", rsa.fd_out);
+			ft_putstr_fd(P_NOT_PRIME, rsa.fd_out);
 		if (!(ft_is_primary(gg.q, 9.0F)) && (option |= 0x1))
-			ft_putstr_fd("RSA key error: q not prime\n", rsa.fd_out);
-		if ((0) && (option |= 0x1))
-			ft_putstr_fd("RSA key error: d e not congruent to 1\n", rsa.fd_out);
+			ft_putstr_fd(Q_NOT_PRIME, rsa.fd_out);
 		if (mulmod(gg.q, gg.iqmp, gg.p) != 1 && (option |= 0x1))
-			ft_putstr_fd("RSA key error: iqmp not inverse of q\n", rsa.fd_out);
+			ft_putstr_fd(NOT_INV_Q, rsa.fd_out);
 		if ((mulmod(gg.dmp1, gg.e, gg.p - 1) != 1 ||\
 			mulmod(gg.dmq1, gg.e, gg.q - 1) != 1) && (option |= 0x1))
-			ft_putstr_fd("RSA key error: d e not congruent to 1\n", rsa.fd_out);
+			ft_putstr_fd(DE_NOT_CONG, rsa.fd_out);
 	}
 	if (!option)
 		ft_putstr_fd("RSA key ok\n", rsa.fd_out);

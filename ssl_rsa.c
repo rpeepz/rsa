@@ -6,7 +6,7 @@
 /*   By: rpapagna <rpapagna@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/10/12 18:59:43 by rpapagna          #+#    #+#             */
-/*   Updated: 2019/12/05 18:19:03 by rpapagna         ###   ########.fr       */
+/*   Updated: 2019/12/13 20:18:17 by rpapagna         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,7 +92,7 @@ int				parse_rsa(char **av, t_ssl *ssl, t_rsa_out *rsa, int i)
 		{
 			if (valid_arg(ssl, rsa, &av[i][1], av[i + 1]))
 				return (ft_error(6, &av[i][1], ssl));
-			else if (rsa->fd_out == 1 && rsa->flag & 0x1)
+			else if (rsa->fd_out == 1 && rsa->flag & F_OUT)
 				open_file_to_fd(&rsa->fd_out, av[++i], 1);
 			else if (ssl->type > 31 && (!rsa->fd_in) && (rsa->flag & F_IN))
 				open_file_to_fd(&rsa->fd_in, av[++i], 0);
@@ -115,7 +115,7 @@ void			ssl_rsa(char **av, t_ssl *ssl)
 	if (parse_rsa(av, ssl, &rsa, 1))
 	{
 		if (rsa.bits == -1)
-			ft_printf("rsa routines:RSA_BUILTIN_KEYGEN:key size too small\n");
+			ft_putstr_fd(KEY_SMALL, 2);
 		else
 			return ;
 	}

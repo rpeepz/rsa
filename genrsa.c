@@ -6,37 +6,12 @@
 /*   By: rpapagna <rpapagna@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/10/31 22:56:10 by rpapagna          #+#    #+#             */
-/*   Updated: 2019/11/17 21:06:55 by rpapagna         ###   ########.fr       */
+/*   Updated: 2019/12/13 20:18:25 by rpapagna         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "rsa.h"
-
-__uint64_t		genrand(__uint64_t min, __uint64_t max)
-{
-	int				fd;
-	int				bytes;
-	__uint64_t		tmp;
-	unsigned char	*buf;
-
-	tmp = max;
-	bytes = 0;
-	while (tmp && ++bytes)
-		tmp >>= 8;
-	buf = ft_memalloc(sizeof(unsigned char) * (bytes + 1));
-	fd = open("/dev/urandom", O_RDONLY);
-	while (1)
-	{
-		ft_bzero(buf, bytes);
-		read(fd, buf, bytes);
-		ft_memcpy(&tmp, buf, bytes);
-		if (tmp >= min && tmp <= max)
-			break ;
-	}
-	close(fd);
-	free(buf);
-	return (tmp);
-}
+#include "standard.h"
 
 __uint64_t		genprime(int bits, int out)
 {
