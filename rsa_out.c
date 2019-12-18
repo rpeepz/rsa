@@ -73,7 +73,7 @@ void			rsa_encode_out(t_rsa_out rsa, t_rsa gg)
 			buf[i + 2] = 0x00;
 	ft_putstr_fd((rsa.flag & R_PUBOUT || rsa.flag & R_PUBIN) ?\
 	PUB_BEG : PRIV_BEG, rsa.fd_out);
-	base64_nstr_fd(buf, len, rsa.fd_out);
+	base64_nstr_fd(buf, len, rsa.fd_out, 0);
 	ft_putstr_fd((rsa.flag & R_PUBOUT || rsa.flag & R_PUBIN) ?\
 	PUB_END : PRIV_END, rsa.fd_out);
 	rsa.fd_out > 1 ? close(rsa.fd_out) : 0;
