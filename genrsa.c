@@ -6,7 +6,7 @@
 /*   By: rpapagna <rpapagna@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/10/31 22:56:10 by rpapagna          #+#    #+#             */
-/*   Updated: 2019/12/13 20:18:25 by rpapagna         ###   ########.fr       */
+/*   Updated: 2019/12/17 19:31:06 by rpapagna         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,8 +69,8 @@ __uint64_t		genrsa(t_rsa_out rsa)
 	char		buf[80];
 
 	ft_bzero(buf, 80);
-	ft_sprintf(buf, "Generating RSA private key, %d bit long modulus\n",
-	rsa.bits);
+	ft_bzero(&gg, sizeof(gg));
+	ft_sprintf(buf, "%s, %d bit long modulus\n", GEN_PRV, rsa.bits);
 	ft_putstr_fd(buf, 2);
 	while (1)
 	{
