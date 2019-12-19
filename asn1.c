@@ -11,7 +11,7 @@
 /* ************************************************************************** */
 
 #include "rsa.h"
-#include "encode.h"
+#include "cipher.h"
 
 static void		asn1_cont(t_rsa gg, uint8_t *buf, uint8_t *buf2, int *len)
 {

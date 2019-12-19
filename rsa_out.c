@@ -11,7 +11,7 @@
 /* ************************************************************************** */
 
 #include "rsa.h"
-#include "encode.h"
+#include "cipher.h"
 
 void			debug_output(t_ssl *ssl, t_rsa_out rsa)
 {

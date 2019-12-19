@@ -11,7 +11,7 @@
 /* ************************************************************************** */
 
 #include "rsa.h"
-#include "encode.h"
+#include "cipher.h"
 
 int				get_value(t_rsa *gg, __uint64_t value, int flag)
 {

@@ -11,7 +11,7 @@
 /* ************************************************************************** */
 
 #include "rsa.h"
-#include "encode.h"
+#include "cipher.h"
 
 char		byte_len(__uint64_t n)
 {
